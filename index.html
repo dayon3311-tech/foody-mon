@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Foody-Mon</title>
+    <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+    <div id="app-container">
+        
+        <!-- Room Background -->
+        <div id="room-bg-layer" class="room-bg-layer">
+            <div class="room-wall-left"></div>
+            <div class="room-wall-right"></div>
+            <div class="room-floor"></div>
+            
+            <div id="bg-window" class="bg-item window active">
+                <div class="window-frame">
+                    <div class="window-pane sky-day" id="window-sky"></div>
+                </div>
+            </div>
+            
+            <div id="bg-carpet" class="bg-item carpet"></div>
+            <div id="bg-bookshelf" class="bg-item bookshelf"></div>
+            <div id="bg-plant" class="bg-item plant"></div>
+            <div id="bg-plushie" class="bg-item plushie"></div>
+        </div>
+
+        <!-- Login / Onboarding Screen -->
+        <div id="onboarding-screen" class="screen active">
+            <div class="story-container">
+                <div id="story-pet-container" class="pet-image-wrapper roam-anim-small" style="margin-bottom: 24px;">
+                    <img id="story-pet-image" src="assets/level3.png" alt="푸디몬" class="pet-blend">
+                </div>
+                
+                <div id="login-section" class="dialogue-box" style="text-align: center; width: 100%;">
+                    <h1 style="color: var(--primary); margin-bottom: 20px;">푸디몬</h1>
+                    <p style="margin-bottom: 24px; color: var(--text-muted); font-size: 14px;">당신의 일상과 함께 자라나는 펫</p>
+                    
+                    <button class="social-btn kakao" onclick="mockLogin('카카오')">카카오로 시작하기</button>
+                    <button class="social-btn naver" onclick="mockLogin('네이버')">네이버로 시작하기</button>
+                    <button class="social-btn google" onclick="mockLogin('구글')">Google로 시작하기</button>
+                </div>
+
+                <div id="story-section" style="display: none; width: 100%; flex-direction: column; justify-content: center; align-items: center;">
+                    <div class="dialogue-box center-text" style="width: 100%;">
+                        <button id="story-back-btn" class="story-back-btn" onclick="prevStoryStep()" style="display: none;">
+                            <i data-lucide="arrow-left"></i>
+                        </button>
+                        
+                        <p id="story-text">안녕! 나는 사람의 감각과 감정을 먹고 자라는 푸디몬이야.</p>
+                        
+                        <div id="story-actions" class="story-actions mt-4" style="display: none;">
+                            <!-- Dynamically populated buttons/inputs -->
+                        </div>
+                    </div>
+                    <div id="tap-to-continue" class="tap-hint">화면을 터치해서 계속하기</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Screen -->
+        <div id="main-screen" class="screen">
+            <!-- Top Left Stats -->
+            <header class="top-left-header">
+                <div class="stat-item level-badge">
+                    <i data-lucide="zap"></i>
+                    <span id="level-display">Lv.3 기본 푸디몬</span>
+                </div>
+                <div class="stat-item score">
+                    <i data-lucide="flame" style="color: #ED8936;"></i>
+                    <span id="streak-display">0일 연속</span>
+                </div>
+                <div class="stat-item score">
+                    <span>✨</span>
+                    <span id="currency-display">0</span>
+                </div>
+                <div class="stat-item score" id="shield-indicator" style="display: none;">
+                    <i data-lucide="shield" style="color: #4299E1;"></i>
+                    <span id="shield-display">0</span>
+                </div>
+            </header>
+
+            <!-- Top Right History Button -->
+            <div class="top-right-header">
+                <button class="history-btn" onclick="openHistoryModal()">
+                    <i data-lucide="book-open"></i>
+                </button>
+            </div>
+            
+            <main class="pet-container" id="pet-container">
+                <div class="pet-glow" id="pet-glow"></div>
+                <div id="pet-aura" class="pet-aura" style="display: none;"></div>
+                
+                <div class="pet-image-wrapper roam-anim" id="main-pet-wrapper">
+                    <div id="pet-hat" class="pet-hat" style="display: none;">👑</div>
+                    <div id="pet-costume" class="pet-costume" style="display: none;"></div>
+                    <div id="pet-zzz" class="pet-zzz" style="display: none;">Zzz...</div>
+                    
+                    <img id="pet-image" src="assets/level3.png" alt="Foody-Mon" class="pet-blend">
+                </div>
+
+                <div class="pet-shadow roam-shadow"></div>
+                
+                <div class="progress-bar-container">
+                    <div class="progress-bar" id="score-progress"></div>
+                </div>
+                
+                <div class="status-bubble">
+                    <p id="pet-status-message">푸디몬이 널 기다리고 있어!</p>
+                    <p id="pet-score-text">오늘 지수: 0</p>
+                </div>
+                
+                <button id="test-next-day-btn" class="secondary-btn" style="margin-top: 15px; font-size: 12px; padding: 8px 16px;">
+                    <i data-lucide="calendar"></i> [테스트] 다음 날로 이동
+                </button>
+            </main>
+
+            <nav class="action-dock">
+                <button class="action-btn" onclick="openMealModal()">
+                    <div class="icon-wrapper meal-icon">
+                        <i data-lucide="utensils"></i>
+                    </div>
+                    <span>식사</span>
+                </button>
+                <button class="action-btn" onclick="openModal('sleep-modal')">
+                    <div class="icon-wrapper sleep-icon">
+                        <i data-lucide="moon"></i>
+                    </div>
+                    <span>수면</span>
+                </button>
+                <button class="action-btn" onclick="openModal('emotion-modal')">
+                    <div class="icon-wrapper emotion-icon">
+                        <i data-lucide="smile"></i>
+                    </div>
+                    <span>감정</span>
+                </button>
+                <button class="action-btn" onclick="openModal('inventory-modal')">
+                    <div class="icon-wrapper bag-icon">
+                        <i data-lucide="briefcase"></i>
+                    </div>
+                    <span>가방</span>
+                </button>
+            </nav>
+        </div>
+
+        <!-- Modals -->
+        
+        <!-- History / Logs Modal -->
+        <div id="history-modal" class="modal">
+            <div class="modal-content" style="height: 85vh; display: flex; flex-direction: column;">
+                <button class="close-btn" onclick="closeModal('history-modal')"><i data-lucide="x"></i></button>
+                <div class="modal-header">
+                    <h2>나의 기록장 📖</h2>
+                </div>
+                <p>지금까지 푸디몬과 함께한 소중한 순간들이에요.</p>
+                
+                <div id="history-list" style="overflow-y: auto; flex: 1; margin-top: 10px; padding-right: 10px;">
+                    <!-- History logs injected here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Inventory / Bag Modal -->
+        <div id="inventory-modal" class="modal">
+            <div class="modal-content" style="max-height: 85vh; overflow-y: auto;">
+                <button class="close-btn" onclick="closeModal('inventory-modal')"><i data-lucide="x"></i></button>
+                <div class="modal-header">
+                    <h2>내 가방 🎒</h2>
+                    <button class="secondary-btn" style="width: auto; padding: 8px 16px; font-size: 14px;" onclick="openShop()">상점 가기 🛒</button>
+                </div>
+                
+                <div class="inventory-section">
+                    <h3>소모품</h3>
+                    <div class="item-card">
+                        <div class="item-icon">🛡️</div>
+                        <div class="item-info">
+                            <h4>스트릭 방패</h4>
+                            <p>기록을 잊어도 연속 달성이 유지돼요.</p>
+                        </div>
+                        <div class="item-count" id="inv-shield-count">0개</div>
+                    </div>
+                </div>
+
+                <div class="inventory-section mt-4">
+                    <h3>내 코스튬 (터치 장착)</h3>
+                    <div class="costume-grid" id="inventory-costumes"></div>
+                </div>
+
+                <div class="inventory-section mt-4">
+                    <h3>내 배경 (터치 장착)</h3>
+                    <div class="costume-grid" id="inventory-backgrounds"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Shop Modal -->
+        <div id="shop-modal" class="modal">
+            <div class="modal-content" style="height: 85vh; display: flex; flex-direction: column;">
+                <button class="close-btn" onclick="closeModal('shop-modal')"><i data-lucide="x"></i></button>
+                <div class="modal-header">
+                    <h2>푸디몬 상점 🏪</h2>
+                    <div class="stat-item score" style="margin:0;">
+                        <span>✨</span>
+                        <span id="shop-currency-display">0</span>
+                    </div>
+                </div>
+                <p>별가루로 코스튬과 방을 꾸며보세요!</p>
+                
+                <div class="shop-tabs">
+                    <button class="shop-tab active" onclick="switchShopTab('costume')">코스튬</button>
+                    <button class="shop-tab" onclick="switchShopTab('background')">방 꾸미기</button>
+                </div>
+
+                <div class="shop-grid" id="shop-items-costume" style="overflow-y: auto; flex: 1; margin-top: 10px;"></div>
+                <div class="shop-grid" id="shop-items-background" style="overflow-y: auto; flex: 1; margin-top: 10px; display: none;"></div>
+            </div>
+        </div>
+
+        <!-- Meal Modal -->
+        <div id="meal-modal" class="modal">
+            <div class="modal-content" id="meal-step-1">
+                <button class="close-btn" onclick="closeModal('meal-modal')"><i data-lucide="x"></i></button>
+                <div class="modal-header">
+                    <h2>푸디몬의 식사 시간! 🍽️</h2>
+                </div>
+                <p id="meal-quiz-text">오늘 먹은 음식 중 가장 노란색이었던 건 뭐야?</p>
+                <input type="text" id="meal-quiz-answer" class="text-input" placeholder="답변을 적어주세요!">
+                
+                <!-- Only used for Yes/No Quizzes -->
+                <div class="meal-options mt-4" id="meal-quiz-yesno-options" style="display: none;">
+                    <button class="option-btn" onclick="setYesNoAnswer('네')">네, 그랬어요!</button>
+                    <button class="option-btn" onclick="setYesNoAnswer('아니오')">아니오, 안 그랬어요</button>
+                </div>
+                
+                <button class="primary-btn mt-4" id="meal-quiz-next-btn" onclick="nextMealStep()">다음으로</button>
+                <button class="secondary-btn mt-4" style="color: #F56565; background: #FFF5F5;" onclick="skipMeal()">
+                    <i data-lucide="x-circle"></i> 아무것도 먹지 않았어요 (결식)
+                </button>
+            </div>
+            
+            <div class="modal-content" id="meal-step-2" style="display: none;">
+                <button class="close-btn" onclick="closeModal('meal-modal')"><i data-lucide="x"></i></button>
+                <div class="modal-header">
+                    <h2>얼만큼 먹었는지 선택해 줘! 🥄</h2>
+                </div>
+                <div class="meal-options mt-4">
+                    <button class="option-btn" data-type="meal" data-val="0.33">1/3 이하</button>
+                    <button class="option-btn" data-type="meal" data-val="0.5">1/2</button>
+                    <button class="option-btn" data-type="meal" data-val="0.66">2/3</button>
+                    <button class="option-btn" data-type="meal" data-val="1.0">1 (정량)</button>
+                    <button class="option-btn" data-type="meal" data-val="1.5">1.5</button>
+                    <button class="option-btn" data-type="meal" data-val="2.0">2 이상</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="sleep-modal" class="modal">
+            <div class="modal-content">
+                <button class="close-btn" onclick="closeModal('sleep-modal')"><i data-lucide="x"></i></button>
+                <div class="modal-header">
+                    <h2>간밤에 잘 잤어? 💤</h2>
+                </div>
+                <p>몇 시간 정도 잔 거 같아?</p>
+                <input type="number" id="sleep-input" min="0" max="24" value="7" class="time-input">
+                <button class="primary-btn mt-4" id="submit-sleep-btn">기록하기</button>
+            </div>
+        </div>
+
+        <div id="emotion-modal" class="modal">
+            <div class="modal-content">
+                <button class="close-btn" onclick="closeModal('emotion-modal')"><i data-lucide="x"></i></button>
+                <div class="modal-header">
+                    <h2>지금 기분은 어때? 💖</h2>
+                </div>
+                <p>푸디몬은 너의 기분을 먹고 자라!</p>
+                <div class="emotion-options">
+                    <button class="option-btn" data-type="emotion" data-val="20">매우 나쁨 😭</button>
+                    <button class="option-btn" data-type="emotion" data-val="40">나쁨 😢</button>
+                    <button class="option-btn" data-type="emotion" data-val="60">보통 😐</button>
+                    <button class="option-btn" data-type="emotion" data-val="80">좋음 😊</button>
+                    <button class="option-btn" data-type="emotion" data-val="100">매우 좋음 🥰</button>
+                </div>
+            </div>
+        </div>
+        
+        <div id="attendance-modal" class="modal">
+            <div class="modal-content" style="text-align: center; padding-top: 40px;">
+                <h2 style="font-size: 28px; margin-bottom: 10px;">출석 완료! ☀️</h2>
+                <p>오늘도 잊지 않고 찾아왔구나!</p>
+                <div style="font-size: 60px; margin: 20px 0;">✨</div>
+                <h3 id="attendance-reward-text" style="color: var(--primary); margin-bottom: 24px;">별가루 +10개 획득!</h3>
+                <button class="primary-btn" onclick="closeModal('attendance-modal')">확인</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="toast" class="toast">기록 완료!</div>
+    
+    <div id="click-particle" class="click-particle">💖</div>
+
+    <script src="app.js"></script>
+</body>
+</html>
